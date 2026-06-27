@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Translator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .tab-active {
+      border-bottom: 3px solid #6366f1;
+      color: #6366f1;
+      font-weight: 600;
+    }
+    textarea { resize: vertical; }
+    .fade-in { animation: fadeIn 0.3s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-white shadow-sm">
+    <div class="max-w-3xl mx-auto px-4 py-5 flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold text-gray-900">AI Translator</h1>
+        <p class="text-xs text-gray-400">Powered by GPT-4o mini</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="max-w-3xl mx-auto px-4 py-8 w-full flex-1">
+
+    <!-- Tabs -->
+    <div class="flex border-b border-gray-200 mb-6">
+      <button id="tab-translate" onclick="switchTab('translate')"
+        class="tab-active px-5 py-3 text-sm text-gray-500 hover:text-indigo-600 transition-colors focus:outline-none">
+        Translate
+      </button>
+      <button id="tab-reply" onclick="switchTab('reply')"
+        class="px-5 py-3 text-sm text-gray-500 hover:text-indigo-600 transition-colors focus:outline-none">
+        Reply &amp; Translate
+      </button>
+    </div>
+
+    <!-- Language Selector (shared) -->
+    <div class="mb-5">
+      <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Target Language</label>
+      <select id="target-language"
+        class="w-full sm:w-64 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white shadow-sm focus:ring-2 focus:ring-indigo-300 focus:outline-none">
+        <option>English</option>
+        <option>Spanish</option>
+        <option>French</option>
+        <option>German</option>
+        <option>Italian</option>
+        <option>Portuguese</option>
+        <option>Japanese</option>
+        <option>Korean</option>
+        <option>Chinese (Simplified)</option>
+        <option>Chinese (Traditional)</option>
+        <option>Arabic</option>
+        <option>Hindi</option>
+        <option>Russian</option>
+        <option>Dutch</option>
+        <option>Polish</option>
+        <option>Turkish</option>
+        <option>Vietnamese</option>
+        <option>Thai</option>
+        <option>Indonesian</option>
+        <option>Malay</option>
+        <option>Swedish</option>
+        <option>Norwegian</option>
+        <option>Danish</option>
+        <option>Finnish</option>
+        <option>Greek</option>
+        <option>Czech</option>
+        <option>Romanian</option>
+        <option>Hungarian</option>
+        <option>Ukrainian</option>
+        <option>Hebrew</option>
+      </select>
+    </div>
+
+    <!-- Tab: Normal Translate -->
+    <div id="panel-translate">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Text to Translate</label>
+          <textarea id="translate-input" rows="5" placeholder="Type or paste text here…"
+            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:ring-2 focus:ring-indigo-300 focus:outline-none placeholder-gray-300"></textarea>
+        </div>
+        <button onclick="doTranslate()"
+          class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-sm font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          Translate
+        </button>
+        <div id="translate-result" class="hidden fade-in">
+          <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Translation</label>
+          <div id="translate-output"
+            class="bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3 text-sm text-gray-800 min-h-[60px] whitespace-pre-wrap"></div>
+          <button onclick="copyText('translate-output')"
+            class="mt-2 text-xs text-indigo-500 hover:text-indigo-700 flex items-center gap-1 transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            Copy
+          </button>
+        </div>
+        <div id="translate-error" class="hidden text-sm text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-3"></div>
+        <div id="translate-loading" class="hidden text-sm text-indigo-400 text-center py-2">Translating…</div>
+      </div>
+    </div>
+
+    <!-- Tab: Reply & Translate -->
+    <div id="panel-reply" class="hidden">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Message You Received</label>
+          <textarea id="reply-original" rows="3" placeholder="Paste the message you received here…"
+            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:ring-2 focus:ring-indigo-300 focus:outline-none placeholder-gray-300"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Your Reply (any language)</label>
+          <textarea id="reply-input" rows="3" placeholder="Write your reply here in any language…"
+            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:ring-2 focus:ring-indigo-300 focus:outline-none placeholder-gray-300"></textarea>
+        </div>
+        <button onclick="doReplyTranslate()"
+          class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-sm font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+          </svg>
+          Translate My Reply
+        </button>
+        <div id="reply-result" class="hidden fade-in">
+          <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Translated Reply</label>
+          <div id="reply-output"
+            class="bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3 text-sm text-gray-800 min-h-[60px] whitespace-pre-wrap"></div>
+          <button onclick="copyText('reply-output')"
+            class="mt-2 text-xs text-indigo-500 hover:text-indigo-700 flex items-center gap-1 transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            Copy
+          </button>
+        </div>
+        <div id="reply-error" class="hidden text-sm text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-3"></div>
+        <div id="reply-loading" class="hidden text-sm text-indigo-400 text-center py-2">Translating…</div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="text-center text-xs text-gray-300 py-4">AI Translator &mdash; personal use</footer>
+
+  <script>
+    function switchTab(tab) {
+      const panels = ['translate', 'reply'];
+      panels.forEach(t => {
+        document.getElementById('panel-' + t).classList.toggle('hidden', t !== tab);
+        const btn = document.getElementById('tab-' + t);
+        btn.classList.toggle('tab-active', t === tab);
+        if (t !== tab) btn.classList.add('text-gray-500');
+        else btn.classList.remove('text-gray-500');
+      });
+    }
+
+    function setLoading(prefix, on) {
+      document.getElementById(prefix + '-loading').classList.toggle('hidden', !on);
+      document.getElementById(prefix + '-result').classList.add('hidden');
+      document.getElementById(prefix + '-error').classList.add('hidden');
+    }
+
+    function showResult(prefix, text) {
+      document.getElementById(prefix + '-output').textContent = text;
+      document.getElementById(prefix + '-result').classList.remove('hidden');
+    }
+
+    function showError(prefix, msg) {
+      const el = document.getElementById(prefix + '-error');
+      el.textContent = 'Error: ' + msg;
+      el.classList.remove('hidden');
+    }
+
+    function copyText(id) {
+      const text = document.getElementById(id).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector(`[onclick="copyText('${id}')"]`);
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Copied!';
+        setTimeout(() => btn.innerHTML = orig, 1500);
+      });
+    }
+
+    async function doTranslate() {
+      const text = document.getElementById('translate-input').value.trim();
+      const lang = document.getElementById('target-language').value;
+      if (!text) return;
+      setLoading('translate', true);
+      try {
+        const res = await fetch('/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, target_language: lang })
+        });
+        const data = await res.json();
+        setLoading('translate', false);
+        if (data.error) showError('translate', data.error);
+        else showResult('translate', data.translated);
+      } catch (e) {
+        setLoading('translate', false);
+        showError('translate', 'Network error. Is the server running?');
+      }
+    }
+
+    async function doReplyTranslate() {
+      const original_message = document.getElementById('reply-original').value.trim();
+      const your_reply = document.getElementById('reply-input').value.trim();
+      const lang = document.getElementById('target-language').value;
+      if (!original_message || !your_reply) return;
+      setLoading('reply', true);
+      try {
+        const res = await fetch('/reply-translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ original_message, your_reply, target_language: lang })
+        });
+        const data = await res.json();
+        setLoading('reply', false);
+        if (data.error) showError('reply', data.error);
+        else showResult('reply', data.translated_reply);
+      } catch (e) {
+        setLoading('reply', false);
+        showError('reply', 'Network error. Is the server running?');
+      }
+    }
+
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        const active = document.getElementById('panel-reply').classList.contains('hidden') ? 'translate' : 'reply';
+        active === 'translate' ? doTranslate() : doReplyTranslate();
+      }
+    });
+  </script>
+</body>
+</html>

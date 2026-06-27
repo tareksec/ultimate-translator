@@ -1,0 +1,103 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: translate
+    description: Translation operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /translate:
+    post:
+      operationId: translate
+      tags: [translate]
+      summary: Translate text
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TranslateInput"
+      responses:
+        "200":
+          description: Translated text
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TranslateResult"
+  /reply-translate:
+    post:
+      operationId: replyTranslate
+      tags: [translate]
+      summary: Translate a reply in context
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReplyTranslateInput"
+      responses:
+        "200":
+          description: Translated reply
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReplyTranslateResult"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    TranslateInput:
+      type: object
+      required: [text, target_language]
+      properties:
+        text:
+          type: string
+        target_language:
+          type: string
+    TranslateResult:
+      type: object
+      required: [translated]
+      properties:
+        translated:
+          type: string
+    ReplyTranslateInput:
+      type: object
+      required: [original_message, your_reply, target_language]
+      properties:
+        original_message:
+          type: string
+        your_reply:
+          type: string
+        target_language:
+          type: string
+    ReplyTranslateResult:
+      type: object
+      required: [translated_reply]
+      properties:
+        translated_reply:
+          type: string
