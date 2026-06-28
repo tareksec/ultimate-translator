@@ -11,7 +11,9 @@ client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
 )
 
-MODEL = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
+# Defaults to a free OpenRouter model so a free API key works out of the box.
+# Override with the OPENROUTER_MODEL env var to use a different/paid model.
+MODEL = os.getenv("OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free")
 
 
 @app.route("/")
