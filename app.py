@@ -6,7 +6,12 @@ import os
 load_dotenv()
 
 app = Flask(__name__)
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    base_url="https://openrouter.ai/api/v1",
+)
+
+MODEL = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
 
 
 @app.route("/")
@@ -25,7 +30,7 @@ def translate():
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=MODEL,
             messages=[
                 {
                     "role": "system",
@@ -55,7 +60,7 @@ def reply_translate():
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=MODEL,
             messages=[
                 {
                     "role": "system",
